@@ -147,6 +147,7 @@ class Haasoscope():
         self.dooversample=np.zeros(num_board*num_chan_per_board, dtype=int) # 1 is oversampling, 0 is no oversampling, 9 is over-oversampling
         self.rollingtrigger=True #rolling auto trigger at 5 Hz 
         self.dologicanalyzer=False #whether to send logic analyzer data
+        self.writetofile = False
         
         self.Vrms=np.zeros(num_board*num_chan_per_board, dtype=float) # the Vrms for each channel
         self.Vmean=np.zeros(num_board*num_chan_per_board, dtype=float) # the Vmean for each channel
@@ -988,6 +989,7 @@ class Haasoscope():
                 else:
                     self.leveltemp=self.leveltemp+event.key
                     print "leveltemp",self.leveltemp; return
+            elif event.key=="w": self.writetofile = not self.writetofile
             elif event.key=="r": self.rolltrigger=not self.rolltrigger; self.tellrolltrig(self.rolltrigger);return
             elif event.key=="p": self.paused = not self.paused;print "paused",self.paused; return
             elif event.key=="P": self.getone = not self.getone;print "get one",self.getone; return

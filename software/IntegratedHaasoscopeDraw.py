@@ -58,6 +58,8 @@ try:
 
 	sara = float(sara)
 	
+	writtentimeres = False
+	
 	nevents=0; oldnevents=0; tinterval=100.; oldtime=time.time()
 	while 1:
 		if d.paused: time.sleep(.1)
@@ -91,7 +93,7 @@ try:
 			volt_value = np.asarray(volt_value)
 			time_value = np.asarray(time_value)*1e9		#convert to ns
 			
-			if savetofile:
+			if savetofile and d.writetofile:
 				outH.write(str(nevents)); outH.write(",")
 				outS.write(str(nevents)); outS.write(",")
 				outT.write(str(nevents)); outT.write(",") # start of each line is the event number
@@ -106,11 +108,12 @@ try:
 				volt_value.tofile(outS,",",format="%.3f")
 				outS.write("\n")
 				
-				if nevents == 0: #create timeres files one time
+				if not writtentimeres: #create timeres files one time
 					d.xydata[0][0].tofile(resH,",",format="%.3f")
 					time_value.tofile(resS,",",format="%.3f")
 					resH.close()
 					resS.close()
+					writtentimeres = True
 			#if len(HaasoscopeLib.max10adcchans)>0: print "slow", d.xydataslow[0][0][99], d.xydataslow[0][1][99] # print the x and y data, respectively, for the 100th sample on slow max10 adc channel 0
 			
 			#if d.dolockin: print d.lockinamp, d.lockinphase # print the lockin info
