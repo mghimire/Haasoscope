@@ -7,6 +7,8 @@ filenames = sys.argv
 
 timestamp = filenames[1][13:-4]
 
+print filenames
+
 data = []
 
 for i in range(1,len(filenames)):
@@ -15,21 +17,25 @@ for i in range(1,len(filenames)):
 		raw = list(raw)
 		data.append(raw)
 
-data 		= np.asarray(data)
-
-Original	= data[0]
-Stramp		= data[1]
-Trigger		= data[2]
-Origtime	= data[3]
-Stramptime	= data[4]
-
+Original	= np.array(data[0])
+Stramp		= np.array(data[1])
+Trigger		= np.array(data[2])
+Origtime	= np.array(data[3])[0].astype(float)
+Stramptime	= np.array(data[4])[0].astype(float)
 
 for i in range(np.shape(Original)[0]):
-	eventno = Original[i][0]
+	eventno 	= Original[i][0]
+	Origvals 	= (Original[i][2:].astype(float) - 80.0)
+	Strampvals 	= Stramp[i][2:].astype(float)*20.0
+	Trigvals	= Trigger[i][2:].astype(float)*40.0
 	plt.figure(figsize=(7,5))
-	plt.plot(Origtime[0], Original[i][2:], 'y', Stramptime[0], Stramp[i][2:], 'b', Stramptime[0], Trigger[i][2:], 'r')
-	#pl.legend()
-	#pl.show()
+	plt.plot(Origtime, Origvals, 'y')
+#	plt.plot(Stramptime, Strampvals, 'b')
+	plt.plot(Stramptime + 250, Trigvals, 'r')
+	plt.grid()
+	#plt.legend()
+	#plt.show()
+	plt.xlim([-50,200])
 	plt.savefig('Plot_' + timestamp + '_' + eventno + '.pdf')
 	plt.close()
 
