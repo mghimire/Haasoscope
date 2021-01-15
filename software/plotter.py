@@ -25,17 +25,17 @@ Stramptime	= np.array(data[4])[0].astype(float)
 
 for i in range(np.shape(Original)[0]):
 	eventno 	= Original[i][0]
-	Origvals 	= (Original[i][2:].astype(float) - 80.0)
-	Strampvals 	= Stramp[i][2:].astype(float)*20.0
-	Trigvals	= Trigger[i][2:].astype(float)*40.0
+	Origvals 	= (Original[i][2:].astype(float) - 83.0)/1000.0
+	Strampvals 	= (Stramp[i][2:].astype(float) + 3)/10.0
+	Trigvals	= Trigger[i][2:].astype(float)
 	plt.figure(figsize=(7,5))
-	plt.plot(Origtime, Origvals, 'y')
-#	plt.plot(Stramptime, Strampvals, 'b')
-	plt.plot(Stramptime + 250, Trigvals, 'r')
+	plt.plot(Origtime, Origvals, 'y.-')
+	plt.plot(Stramptime, Strampvals, 'b.-')
+#	plt.plot(Stramptime, Trigvals, 'r')
 	plt.grid()
-	#plt.legend()
-	#plt.show()
-	plt.xlim([-50,200])
+#	plt.legend()
+#	plt.show()
+	plt.xlim([-350,350])
 	plt.savefig('Plot_' + timestamp + '_' + eventno + '.pdf')
 	plt.close()
 

@@ -79,10 +79,10 @@ try:
 			for data in recv1:
 				data = data.encode('hex')
 				data = int(data, 16)
-#				if data > 127:
-#					data = data - 255
-#				else:
-#					pass
+				if data > 127:
+					data = data - 255
+				else:
+					pass
 				volt_value.append(data)
 		    
 			for idx in range(0,len(volt_value)):
@@ -101,10 +101,10 @@ try:
 				outH.write(eventtime); outH.write(",")
 				outS.write(eventtime); outS.write(",")
 				outT.write(eventtime); outT.write(",") # next column is the time in seconds of the current event
-				d.xydata[3][1].tofile(outH,",",format="%.3f") # save y data (1) from fast adc channel 3
-				outH.write("\n")
-				d.xydata[0][1].tofile(outT,",",format="%.3f") # save y data (1) from fast adc channel 0
+				d.xydata[3][1].tofile(outT,",",format="%.3f") # save y data (1) from fast adc channel 3
 				outT.write("\n")
+				d.xydata[0][1].tofile(outH,",",format="%.3f") # save y data (1) from fast adc channel 0
+				outH.write("\n")
 				volt_value.tofile(outS,",",format="%.3f")
 				outS.write("\n")
 				
