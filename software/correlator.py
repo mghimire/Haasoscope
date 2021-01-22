@@ -27,13 +27,22 @@ datanum		= np.shape(Original)[0] - 2
 
 print('There are', datanum, 'events')
 
+timerngmin	= -350	#in ns
+timerngmax	= 350	#in ns
+
 origbaseval	= 82	#in mV
 origscale	= 1000.	#convert mV to V
 strampbaseval	= -3	#in V
 strampscale	= 10.	#due to x10 gain
 
-fastdata    = -1.0*(Original[:,2:].astype(float) - origbaseval)/origscale
-slowdata    = (Stramp[:,2:].astype(float) - strampbaseval)/strampscale
+fastdata	= -1.0*(Original[:,2:].astype(float) - origbaseval)/origscale
+slowdata	= (Stramp[:,2:].astype(float) - strampbaseval)/strampscale
+
+minindex	= np.where(Stramptime > timerngmin)[0][0]
+maxindex	= np.where(Stramptime < timerngmax)[0][-1]
+
+slowdata	= slowdata[:,minindex:maxindex]
+
 
 #classify into single signal and multiple signal first
 
@@ -58,7 +67,7 @@ print('There are', np.shape(multisgnl)[0], 'multiple signal events')
 
 #examples of mono signal, multi signal and anomaly
 plt.figure(figsize=(7,5))
-plt.plot(Stramptime, slowdata[monosgnl[0]], 'y', Origtime, fastdata[monosgnl[0]], 'b')
+plt.plot(Stramptime[minindex:maxindex], slowdata[monosgnl[0]], 'y', Origtime, fastdata[monosgnl[0]], 'b')
 #plt.legend()
 plt.grid()
 plt.xlim([-350,350])
@@ -67,7 +76,7 @@ plt.savefig('mono.jpg')
 plt.close()
 
 plt.figure(figsize=(7,5))
-plt.plot(Stramptime, slowdata[multisgnl[0]], 'y', Origtime, fastdata[multisgnl[0]], 'b')
+plt.plot(Stramptime[minindex:maxindex], slowdata[multisgnl[0]], 'y', Origtime, fastdata[multisgnl[0]], 'b')
 #plt.legend()
 plt.grid()
 plt.xlim([-350,350])
@@ -199,8 +208,8 @@ plt.figure(figsize=(7,5))
 plt.scatter(slowloc, fastloc, marker='.')
 plt.plot(np.unique(slowloc), np.poly1d(np.polyfit(slowloc, fastloc, 1))(np.unique(slowloc)), 'r')
 ax = plt.gca()
-ax.set_xlabel('location of slow signal peak')
-ax.set_ylabel('location of fast signal peak')
+ax.set_xlabel('location of fast signal peak')
+ax.set_ylabel('location of slow signal peak')
 
 j = 0
 for i in monosgnl:
