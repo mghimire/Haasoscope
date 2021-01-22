@@ -109,15 +109,18 @@ for i in monosgnl:
 	slowpeaks	= np.where(slowdata[i]>0.05)
 	slowint[j]	= np.sum(slowdata[i][slowpeaks])*(Stramptime[1]-Stramptime[0])
 	slowmax[j]	= np.amax(slowdata[i])
-	slowloc[j]	= Stramptime[np.argmax(slowdata[i])]
+	slowloc[j]	= Stramptime[np.argmax(slowdata[i])+minindex]
 
 	j += 1
 
 newpeaks	= np.where(fastmax > minpeakval + noisethres)
-newfast 	= fastint[newpeaks]
-newslow		= slowint[newpeaks]
+newfastint 	= fastint[newpeaks]
+newslowint	= slowint[newpeaks]
 newfastmax	= fastmax[newpeaks]
 newslowmax	= slowmax[newpeaks]
+newfastloc	= fastloc[newpeaks]
+newslowloc	= slowloc[newpeaks]
+
 
 plt.figure(figsize=(7,5))
 plt.scatter(slowint, fastint, marker='.')
@@ -157,13 +160,13 @@ plt.savefig('peakint_pobf.jpg')
 plt.close()
 
 plt.figure(figsize=(7,5))
-plt.scatter(newslow, newfast, marker='.')
-plt.plot(np.unique(newslow), np.poly1d(np.polyfit(newslow, newfast, 2))(np.unique(newslow)), 'r')
+plt.scatter(newslowint, newfastint, marker='.')
+plt.plot(np.unique(newslowint), np.poly1d(np.polyfit(newslowint, newfastint, 2))(np.unique(newslowint)), 'r')
 ax = plt.gca()
 ax.set_xlabel('integral around slow signal peak')
 ax.set_ylabel('integral around fast signal peak')
 plt.grid()
-plt.text(0.7, 0.1,'a = ' + '%.5f' % np.polyfit(newfast, newslow, 2)[0] + ' b = ' + '%.5f' % np.polyfit(newfast, newslow, 2)[1] + ' c = ' + '%.5f' % np.polyfit(newfast, newslow, 2)[2], horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
+plt.text(0.7, 0.1,'a = ' + '%.5f' % np.polyfit(newfastint, newslowint, 2)[0] + ' b = ' + '%.5f' % np.polyfit(newfastint, newslowint, 2)[1] + ' c = ' + '%.5f' % np.polyfit(newfastint, newslowint, 2)[2], horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
 #plt.show()
 plt.savefig('newpeakint_pobf.jpg')
 plt.close()
@@ -189,10 +192,10 @@ plt.savefig('newpeaks_correlation.jpg')
 plt.close()
 
 plt.figure(figsize=(7,5))
-plt.scatter(slowloc, fastloc, marker='.')
+plt.scatter(newslowloc, newfastloc, marker='.')
 ax = plt.gca()
-ax.set_xlabel('location of fast signal peak')
-ax.set_ylabel('location of slow signal peak')
+ax.set_xlabel('location of slow signal peak')
+ax.set_ylabel('location of fast signal peak')
 
 j = 0
 for i in monosgnl:
@@ -205,11 +208,11 @@ plt.savefig('peakloc_correlation.jpg')
 plt.close()
 
 plt.figure(figsize=(7,5))
-plt.scatter(slowloc, fastloc, marker='.')
-plt.plot(np.unique(slowloc), np.poly1d(np.polyfit(slowloc, fastloc, 1))(np.unique(slowloc)), 'r')
+plt.scatter(newslowloc, newfastloc, marker='.')
+plt.plot(np.unique(newslowloc), np.poly1d(np.polyfit(newslowloc, newfastloc, 1))(np.unique(newslowloc)), 'r')
 ax = plt.gca()
-ax.set_xlabel('location of fast signal peak')
-ax.set_ylabel('location of slow signal peak')
+ax.set_xlabel('location of slow signal peak')
+ax.set_ylabel('location of fast signal peak')
 
 j = 0
 for i in monosgnl:
@@ -217,12 +220,33 @@ for i in monosgnl:
 	j += 1
 
 plt.grid()
-plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(fastloc, slowloc, 1)[0] + ' b = ' + '%.5f' % np.polyfit(fastloc, slowloc, 1)[1],
+plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(newfastloc, newslowloc, 1)[0] + ' b = ' + '%.5f' % np.polyfit(newfastloc, newslowloc, 1)[1],
      horizontalalignment='center',
      verticalalignment='center',
      transform = ax.transAxes)
 #plt.show()
 plt.savefig('peakloc_lobf.jpg')
+plt.close()
+
+plt.figure(figsize=(7,5))
+plt.scatter(newslowint, newslowloc - newfastloc, marker='.')
+plt.plot(np.unique(newslowloc), np.poly1d(np.polyfit(newslowloc, newfastloc, 1))(np.unique(newslowloc)), 'r')
+ax = plt.gca()
+ax.set_xlabel('integral around slow signal peak')
+ax.set_ylabel('slow signal peak location - fast signal peak location')
+
+#j = 0
+#for i in monosgnl:
+#	ax.annotate(Original[i][0], (slowloc[j], fastloc[j]))
+#	j += 1
+
+plt.grid()
+plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(fastloc, slowloc, 1)[0] + ' b = ' + '%.5f' % np.polyfit(fastloc, slowloc, 1)[1],
+     horizontalalignment='center',
+     verticalalignment='center',
+     transform = ax.transAxes)
+#plt.show()
+plt.savefig('slowint_peaklocdiff_correlation.jpg')
 plt.close()
 
 """trnsgrsrs = []
