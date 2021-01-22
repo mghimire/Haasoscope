@@ -93,14 +93,14 @@ j	= 0 #counter variable for integral arrays
 for i in monosgnl:
 	fastpeaks 	= np.where(fastdata[i]>cutoff)
 	fastint[j]	= np.sum(fastdata[i][fastpeaks])*(Origtime[1]-Origtime[0])
-	fastmax[j]	= np.amax(fastdata[i][fastpeaks])
-	fastloc[j]	= Origtime[np.argmax(fastdata[i][fastpeaks])]
+	fastmax[j]	= np.amax(fastdata[i])
+	fastloc[j]	= Origtime[np.argmax(fastdata[i])]
 
 	slowint[j]	= 0	
 	slowpeaks	= np.where(slowdata[i]>0.05)
 	slowint[j]	= np.sum(slowdata[i][slowpeaks])*(Stramptime[1]-Stramptime[0])
-	slowmax[j]	= np.amax(slowdata[i][slowpeaks])
-	slowloc[j]	= Stramptime[np.argmax(slowdata[i][slowpeaks])]
+	slowmax[j]	= np.amax(slowdata[i])
+	slowloc[j]	= Stramptime[np.argmax(slowdata[i])]
 
 	j += 1
 
