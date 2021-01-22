@@ -38,6 +38,8 @@ slowdata    = (Stramp[:,2:].astype(float) - strampbaseval)/strampscale
 #classify into single signal and multiple signal first
 
 cutoff		= 5/origscale
+noisethres	= 6/origscale
+minpeakval	= 0.015
 
 monosgnl   	= []	#signals with a single peak
 multisgnl   	= []	#signals with multiple peaks
@@ -84,35 +86,46 @@ fastint		= np.zeros(mononum)
 slowmax		= np.zeros(mononum)
 fastmax		= np.zeros(mononum)
 
+slowloc		= np.zeros(mononum)
+fastloc 	= np.zeros(mononum)
+
 j	= 0 #counter variable for integral arrays
 for i in monosgnl:
 	fastpeaks 	= np.where(fastdata[i]>cutoff)
 	fastint[j]	= np.sum(fastdata[i][fastpeaks])*(Origtime[1]-Origtime[0])
 	fastmax[j]	= np.amax(fastdata[i][fastpeaks])
+	fastloc[j]	= Origtime[np.argmax(fastdata[i][fastpeaks])]
 
 	slowint[j]	= 0	
 	slowpeaks	= np.where(slowdata[i]>0.05)
 	slowint[j]	= np.sum(slowdata[i][slowpeaks])*(Stramptime[1]-Stramptime[0])
 	slowmax[j]	= np.amax(slowdata[i][slowpeaks])
+	slowloc[j]	= Stramptime[np.argmax(slowdata[i][slowpeaks])]
 
 	j += 1
 
+newpeaks	= np.where(fastmax > minpeakval + noisethres)
+newfast 	= fastint[newpeaks]
+newslow		= slowint[newpeaks]
+newfastmax	= fastmax[newpeaks]
+newslowmax	= slowmax[newpeaks]
+
 plt.figure(figsize=(7,5))
-plt.scatter(fastint, slowint, marker='.')
+plt.scatter(slowint, fastint, marker='.')
 ax = plt.gca()
-ax.set_xlabel('integral around fast signal peak')
-ax.set_ylabel('integral around slow signal peak')
+ax.set_xlabel('integral around slow signal peak')
+ax.set_ylabel('integral around fast signal peak')
 plt.grid()
 #plt.show()
 plt.savefig('peakint_correlation.jpg')
 plt.close()
 
 plt.figure(figsize=(7,5))
-plt.scatter(fastint, slowint, marker='.')
-plt.plot(np.unique(fastint), np.poly1d(np.polyfit(fastint, slowint, 1))(np.unique(fastint)), 'r')
+plt.scatter(slowint, fastint, marker='.')
+plt.plot(np.unique(slowint), np.poly1d(np.polyfit(slowint, fastint, 1))(np.unique(slowint)), 'r')
 ax = plt.gca()
-ax.set_xlabel('integral around fast signal peak')
-ax.set_ylabel('integral around slow signal peak')
+ax.set_xlabel('integral around slow signal peak')
+ax.set_ylabel('integral around fast signal peak')
 plt.grid()
 plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(fastint, slowint, 1)[0] + ' b = ' + '%.5f' % np.polyfit(fastint, slowint, 1)[1],
      horizontalalignment='center',
@@ -123,13 +136,72 @@ plt.savefig('peakint_lobf.jpg')
 plt.close()
 
 plt.figure(figsize=(7,5))
-plt.scatter(fastmax, slowmax, marker='.')
+plt.scatter(slowint, fastint, marker='.')
+plt.plot(np.unique(slowint), np.poly1d(np.polyfit(slowint, fastint, 2))(np.unique(slowint)), 'r')
 ax = plt.gca()
-ax.set_xlabel('highest value of fast signal')
-ax.set_ylabel('highest value of slow signal')
+ax.set_xlabel('integral around slow signal peak')
+ax.set_ylabel('integral around fast signal peak')
+plt.grid()
+plt.text(0.7, 0.1,'a = ' + '%.5f' % np.polyfit(fastint, slowint, 2)[0] + ' b = ' + '%.5f' % np.polyfit(fastint, slowint, 2)[1] + ' c = ' + '%.5f' % np.polyfit(fastint, slowint, 2)[2], horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
+#plt.show()
+plt.savefig('peakint_pobf.jpg')
+plt.close()
+
+plt.figure(figsize=(7,5))
+plt.scatter(newslow, newfast, marker='.')
+plt.plot(np.unique(newslow), np.poly1d(np.polyfit(newslow, newfast, 2))(np.unique(newslow)), 'r')
+ax = plt.gca()
+ax.set_xlabel('integral around slow signal peak')
+ax.set_ylabel('integral around fast signal peak')
+plt.grid()
+plt.text(0.7, 0.1,'a = ' + '%.5f' % np.polyfit(newfast, newslow, 2)[0] + ' b = ' + '%.5f' % np.polyfit(newfast, newslow, 2)[1] + ' c = ' + '%.5f' % np.polyfit(newfast, newslow, 2)[2], horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
+#plt.show()
+plt.savefig('newpeakint_pobf.jpg')
+plt.close()
+
+plt.figure(figsize=(7,5))
+plt.scatter(slowmax, fastmax, marker='.')
+ax = plt.gca()
+ax.set_xlabel('highest value of slow signal')
+ax.set_ylabel('highest value of fast signal')
 plt.grid()
 #plt.show()
 plt.savefig('peaks_correlation.jpg')
+plt.close()
+
+plt.figure(figsize=(7,5))
+plt.scatter(newslowmax, newfastmax, marker='.')
+ax = plt.gca()
+ax.set_xlabel('highest value of slow signal')
+ax.set_ylabel('highest value of fast signal')
+plt.grid()
+#plt.show()
+plt.savefig('newpeaks_correlation.jpg')
+plt.close()
+
+plt.figure(figsize=(7,5))
+plt.scatter(slowloc, fastloc, marker='.')
+ax = plt.gca()
+ax.set_xlabel('location of fast signal peak')
+ax.set_ylabel('location of slow signal peak')
+plt.grid()
+# #plt.show()
+plt.savefig('peakloc_correlation.jpg')
+plt.close()
+
+plt.figure(figsize=(7,5))
+plt.scatter(slowloc, fastloc, marker='.')
+plt.plot(np.unique(slowloc), np.poly1d(np.polyfit(slowloc, fastloc, 1))(np.unique(slowloc)), 'r')
+ax = plt.gca()
+ax.set_xlabel('location of slow signal peak')
+ax.set_ylabel('location of fast signal peak')
+plt.grid()
+plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(fastloc, slowloc, 1)[0] + ' b = ' + '%.5f' % np.polyfit(fastloc, slowloc, 1)[1],
+     horizontalalignment='center',
+     verticalalignment='center',
+     transform = ax.transAxes)
+#plt.show()
+plt.savefig('peakloc_lobf.jpg')
 plt.close()
 
 """trnsgrsrs = []
