@@ -184,6 +184,12 @@ plt.scatter(slowloc, fastloc, marker='.')
 ax = plt.gca()
 ax.set_xlabel('location of fast signal peak')
 ax.set_ylabel('location of slow signal peak')
+
+j = 0
+for i in monosgnl:
+	ax.annotate(Original[i][0], (slowloc[j], fastloc[j]))
+	j += 1
+
 plt.grid()
 # #plt.show()
 plt.savefig('peakloc_correlation.jpg')
@@ -195,6 +201,12 @@ plt.plot(np.unique(slowloc), np.poly1d(np.polyfit(slowloc, fastloc, 1))(np.uniqu
 ax = plt.gca()
 ax.set_xlabel('location of slow signal peak')
 ax.set_ylabel('location of fast signal peak')
+
+j = 0
+for i in monosgnl:
+	ax.annotate(Original[i][0], (slowloc[j], fastloc[j]))
+	j += 1
+
 plt.grid()
 plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(fastloc, slowloc, 1)[0] + ' b = ' + '%.5f' % np.polyfit(fastloc, slowloc, 1)[1],
      horizontalalignment='center',
