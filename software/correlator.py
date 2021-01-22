@@ -29,7 +29,7 @@ print('There are', datanum, 'events')
 
 origbaseval	= 82	#in mV
 origscale	= 1000.	#convert mV to V
-strampbaseval	= -3	#in mV
+strampbaseval	= -3	#in V
 strampscale	= 10.	#due to x10 gain
 
 fastdata    = -1.0*(Original[:,2:].astype(float) - origbaseval)/origscale
@@ -81,14 +81,20 @@ mononum		= np.shape(monosgnl)[0]
 slowint		= np.zeros(mononum)
 fastint		= np.zeros(mononum)
 
+slowmax		= np.zeros(mononum)
+fastmax		= np.zeros(mononum)
+
 j	= 0 #counter variable for integral arrays
 for i in monosgnl:
 	fastpeaks 	= np.where(fastdata[i]>cutoff)
-	fastint[j]	= np.sum(fastdata[i][fastpeaks])
-	slowint[j]	= 0
-	
-	slowpeaks	= np.where(slowdata[i]>0)
-	slowint[j]	= np.sum(slowdata[i][slowpeaks])
+	fastint[j]	= np.sum(fastdata[i][fastpeaks])*(Origtime[1]-Origtime[0])
+	fastmax[j]	= np.amax(fastdata[i][fastpeaks])
+
+	slowint[j]	= 0	
+	slowpeaks	= np.where(slowdata[i]>0.05)
+	slowint[j]	= np.sum(slowdata[i][slowpeaks])*(Stramptime[1]-Stramptime[0])
+	slowmax[j]	= np.amax(slowdata[i][slowpeaks])
+
 	j += 1
 
 plt.figure(figsize=(7,5))
@@ -114,6 +120,16 @@ plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(fastint, slowint, 1)[0] + ' b = '
      transform = ax.transAxes)
 #plt.show()
 plt.savefig('peakint_lobf.jpg')
+plt.close()
+
+plt.figure(figsize=(7,5))
+plt.scatter(fastmax, slowmax, marker='.')
+ax = plt.gca()
+ax.set_xlabel('highest value of fast signal')
+ax.set_ylabel('highest value of slow signal')
+plt.grid()
+#plt.show()
+plt.savefig('peaks_correlation.jpg')
 plt.close()
 
 """trnsgrsrs = []
