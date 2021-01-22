@@ -220,7 +220,7 @@ for i in monosgnl:
 	j += 1
 
 plt.grid()
-plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(newfastloc, newslowloc, 1)[0] + ' b = ' + '%.5f' % np.polyfit(newfastloc, newslowloc, 1)[1],
+plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(newslowloc, newfastloc, 1)[0] + ' b = ' + '%.5f' % np.polyfit(newslowloc, newfastloc, 1)[1],
      horizontalalignment='center',
      verticalalignment='center',
      transform = ax.transAxes)
@@ -228,9 +228,11 @@ plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(newfastloc, newslowloc, 1)[0] + '
 plt.savefig('peakloc_lobf.jpg')
 plt.close()
 
+locdiff = newslowloc - newfastloc
+
 plt.figure(figsize=(7,5))
-plt.scatter(newslowint, newslowloc - newfastloc, marker='.')
-plt.plot(np.unique(newslowloc), np.poly1d(np.polyfit(newslowloc, newfastloc, 1))(np.unique(newslowloc)), 'r')
+plt.scatter(newslowint, locdiff, marker='.')
+plt.plot(np.unique(newslowint), np.poly1d(np.polyfit(newslowint, locdiff, 1))(np.unique(newslowint)), 'r')
 ax = plt.gca()
 ax.set_xlabel('integral around slow signal peak')
 ax.set_ylabel('slow signal peak location - fast signal peak location')
@@ -241,7 +243,7 @@ ax.set_ylabel('slow signal peak location - fast signal peak location')
 #	j += 1
 
 plt.grid()
-plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(fastloc, slowloc, 1)[0] + ' b = ' + '%.5f' % np.polyfit(fastloc, slowloc, 1)[1],
+plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(newslowint, locdiff, 1)[0] + ' b = ' + '%.5f' % np.polyfit(newslowint, locdiff, 1)[1],
      horizontalalignment='center',
      verticalalignment='center',
      transform = ax.transAxes)
