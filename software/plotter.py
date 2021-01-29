@@ -7,7 +7,7 @@ filenames = sys.argv
 
 timestamp = filenames[1][13:-4]
 
-print filenames
+#print(filenames)
 
 data = []
 
@@ -25,12 +25,12 @@ Stramptime	= np.array(data[4])[0].astype(float)
 
 for i in range(np.shape(Original)[0]):
 	eventno 	= Original[i][0]
-	Origvals 	= (Original[i][2:].astype(float) - 83.0)/1000.0
+	Origvals 	= (Original[i][2:].astype(float) - 82.0)/1000.0
 	Strampvals 	= (Stramp[i][2:].astype(float) + 3)/10.0
 	Trigvals	= Trigger[i][2:].astype(float)
 	plt.figure(figsize=(7,5))
-	plt.plot(Origtime, Origvals, 'y.-')
-	plt.plot(Stramptime, Strampvals, 'b.-')
+	plt.plot(Origtime, Origvals, 'b.-')
+	plt.plot(Stramptime, Strampvals, 'y.-')
 #	plt.plot(Stramptime, Trigvals, 'r')
 	plt.grid()
 #	plt.legend()

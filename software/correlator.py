@@ -109,11 +109,12 @@ for i in monosgnl:
 	slowpeaks	= np.where(slowdata[i]>0.05)
 	slowint[j]	= np.sum(slowdata[i][slowpeaks])*(Stramptime[1]-Stramptime[0])
 	slowmax[j]	= np.amax(slowdata[i])
-	slowloc[j]	= Stramptime[np.argmax(slowdata[i])+minindex]
+	slowloc[j]	= Stramptime[minindex:maxindex][np.argmax(slowdata[i])]
 
 	j += 1
 
 newpeaks	= np.where(fastmax > minpeakval + noisethres)
+newmonosgnl	= monosgnl[newpeaks]
 newfastint 	= fastint[newpeaks]
 newslowint	= slowint[newpeaks]
 newfastmax	= fastmax[newpeaks]
@@ -121,6 +122,7 @@ newslowmax	= slowmax[newpeaks]
 newfastloc	= fastloc[newpeaks]
 newslowloc	= slowloc[newpeaks]
 
+print('There are', np.shape(newpeaks)[1], 'filtered events')
 
 plt.figure(figsize=(7,5))
 plt.scatter(slowint, fastint, marker='.')
@@ -192,7 +194,7 @@ plt.savefig('newpeaks_correlation.jpg')
 plt.close()
 
 plt.figure(figsize=(7,5))
-plt.scatter(newslowloc, newfastloc, marker='.')
+plt.scatter(slowloc, fastloc, marker='.')
 ax = plt.gca()
 ax.set_xlabel('location of slow signal peak')
 ax.set_ylabel('location of fast signal peak')
@@ -215,8 +217,8 @@ ax.set_xlabel('location of slow signal peak')
 ax.set_ylabel('location of fast signal peak')
 
 j = 0
-for i in monosgnl:
-	ax.annotate(Original[i][0], (slowloc[j], fastloc[j]))
+for i in newmonosgnl:
+	ax.annotate(Original[i][0], (newslowloc[j], newfastloc[j]))
 	j += 1
 
 plt.grid()
