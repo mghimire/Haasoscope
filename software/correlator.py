@@ -47,7 +47,8 @@ slowdata	= slowdata[:,minindex:maxindex]
 #classify into single signal and multiple signal first
 
 cutoff		= 5/origscale
-noisethres	= 6/origscale
+noiserms	= 1.09
+noisethres	= noiserms*3/origscale
 minpeakval	= 0.015
 
 monosgnl   	= []	#signals with a single peak
@@ -141,7 +142,7 @@ ax = plt.gca()
 ax.set_xlabel('integral around slow signal peak')
 ax.set_ylabel('integral around fast signal peak')
 plt.grid()
-plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(fastint, slowint, 1)[0] + ' b = ' + '%.5f' % np.polyfit(fastint, slowint, 1)[1],
+plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(slowint, fastint, 1)[0] + ' b = ' + '%.5f' % np.polyfit(slowint, fastint, 1)[1],
      horizontalalignment='center',
      verticalalignment='center',
      transform = ax.transAxes)
@@ -156,7 +157,7 @@ ax = plt.gca()
 ax.set_xlabel('integral around slow signal peak')
 ax.set_ylabel('integral around fast signal peak')
 plt.grid()
-plt.text(0.7, 0.1,'a = ' + '%.5f' % np.polyfit(fastint, slowint, 2)[0] + ' b = ' + '%.5f' % np.polyfit(fastint, slowint, 2)[1] + ' c = ' + '%.5f' % np.polyfit(fastint, slowint, 2)[2], horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
+plt.text(0.7, 0.1,'a = ' + '%.5f' % np.polyfit(slowint, fastint, 2)[0] + ' b = ' + '%.5f' % np.polyfit(slowint, fastint, 2)[1] + ' c = ' + '%.5f' % np.polyfit(slowint, fastint, 2)[2], horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
 #plt.show()
 plt.savefig('peakint_pobf.jpg')
 plt.close()
@@ -168,7 +169,7 @@ ax = plt.gca()
 ax.set_xlabel('integral around slow signal peak')
 ax.set_ylabel('integral around fast signal peak')
 plt.grid()
-plt.text(0.7, 0.1,'a = ' + '%.5f' % np.polyfit(newfastint, newslowint, 2)[0] + ' b = ' + '%.5f' % np.polyfit(newfastint, newslowint, 2)[1] + ' c = ' + '%.5f' % np.polyfit(newfastint, newslowint, 2)[2], horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
+plt.text(0.7, 0.1,'a = ' + '%.5f' % np.polyfit(newslowint, newfastint, 2)[0] + ' b = ' + '%.5f' % np.polyfit(newslowint, newfastint, 2)[1] + ' c = ' + '%.5f' % np.polyfit(newslowint, newfastint, 2)[2], horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
 #plt.show()
 plt.savefig('newpeakint_pobf.jpg')
 plt.close()
@@ -227,14 +228,115 @@ plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(newslowloc, newfastloc, 1)[0] + '
      verticalalignment='center',
      transform = ax.transAxes)
 #plt.show()
-plt.savefig('peakloc_lobf.jpg')
+plt.savefig('newpeakloc_lobf.jpg')
 plt.close()
 
-locdiff = newslowloc - newfastloc
+trnsgrsrs = []
+
+def error(i):
+	return newfastloc[i] - np.polyfit(newslowloc, newfastloc, 1)[0]*newslowloc[i] - np.polyfit(newslowloc, newfastloc, 1)[1]
+
+for i in range(np.shape(newpeaks)[1]):
+	err = error(i)
+	if np.abs(err) > 2:
+		trnsgrsrs.append([i,err])
+#		plt.figure(figsize=(7,5))
+#		plt.plot(time, expndata[monosgnl[i]], 'y', time, sgnldata[monosgnl[i]], 'b')
+		#plt.legend()
+#		plt.grid()
+		#plt.show()
+#		plt.savefig(filenames[newmonosgnl[i]] + '.jpg')
+#		plt.close()
+
+trnsgrsrs = np.asarray(trnsgrsrs).astype(int)
+
+print(trnsgrsrs[:,0])
+
+cleanfastint = np.delete(newfastint, trnsgrsrs[:,0], 0)
+cleanslowint = np.delete(newslowint, trnsgrsrs[:,0], 0)
+cleanfastloc = np.delete(newfastloc, trnsgrsrs[:,0], 0)
+cleanslowloc = np.delete(newslowloc, trnsgrsrs[:,0], 0)
+cleanmonosgnl = np.delete(newmonosgnl, trnsgrsrs[:,0], 0)
 
 plt.figure(figsize=(7,5))
-plt.scatter(newslowint, locdiff, marker='.')
-plt.plot(np.unique(newslowint), np.poly1d(np.polyfit(newslowint, locdiff, 1))(np.unique(newslowint)), 'r')
+plt.scatter(cleanslowint, cleanfastint, marker='.')
+ax = plt.gca()
+ax.set_xlabel('integral around slow signal peak without anomalies')
+ax.set_ylabel('integral around fast signal peak without anomalies')
+plt.grid()
+#plt.show()
+plt.savefig('cleanint_correlation.jpg')
+plt.close()
+
+plt.figure(figsize=(7,5))
+plt.scatter(cleanslowint, cleanfastint, marker='.')
+ax = plt.gca()
+ax.set_xlabel('integral around slow signal peak without anomalies')
+ax.set_ylabel('integral around fast signal peak without anomalies')
+
+j = 0
+for i in cleanmonosgnl:
+	ax.annotate(Original[i][0], (cleanslowint[j], cleanfastint[j]))
+	j += 1
+
+plt.grid()
+#plt.show()
+plt.savefig('labeled_cleanint_correlation.jpg')
+plt.close()
+
+plt.figure(figsize=(7,5))
+plt.scatter(cleanslowint, cleanfastint, marker='.')
+plt.plot(np.unique(cleanslowint), np.poly1d(np.polyfit(cleanslowint, cleanfastint, 1))(np.unique(cleanslowint)), 'r')
+ax = plt.gca()
+ax.set_xlabel('integral around slow signal peak')
+ax.set_ylabel('integral around fast signal peak')
+plt.grid()
+plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(cleanslowint, cleanfastint, 1)[0] + ' b = ' + '%.5f' % np.polyfit(cleanslowint, cleanfastint, 1)[1],
+     horizontalalignment='center',
+     verticalalignment='center',
+     transform = ax.transAxes)
+#plt.show()
+plt.savefig('cleanint_lobf.jpg')
+plt.close()
+
+plt.figure(figsize=(7,5))
+plt.scatter(cleanslowint, cleanfastint, marker='.')
+plt.plot(np.unique(cleanslowint), np.poly1d(np.polyfit(cleanslowint, cleanfastint, 2))(np.unique(cleanslowint)), 'r')
+ax = plt.gca()
+ax.set_xlabel('integral around slow signal peak')
+ax.set_ylabel('integral around fast signal peak')
+plt.grid()
+plt.text(0.7, 0.1,'a = ' + '%.5f' % np.polyfit(cleanslowint, cleanfastint, 2)[0] + ' b = ' + '%.5f' % np.polyfit(cleanslowint, cleanfastint, 2)[1] + ' c = ' + '%.5f' % np.polyfit(cleanslowint, cleanfastint, 2)[2], horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
+#plt.show()
+plt.savefig('cleanint_pobf.jpg')
+plt.close()
+
+plt.figure(figsize=(7,5))
+plt.scatter(cleanslowloc, cleanfastloc, marker='.')
+plt.plot(np.unique(cleanslowloc), np.poly1d(np.polyfit(cleanslowloc, cleanfastloc, 1))(np.unique(cleanslowloc)), 'r')
+ax = plt.gca()
+ax.set_xlabel('location of slow signal peak')
+ax.set_ylabel('location of fast signal peak')
+
+j = 0
+for i in cleanmonosgnl:
+	ax.annotate(Original[i][0], (cleanslowloc[j], cleanfastloc[j]))
+	j += 1
+
+plt.grid()
+plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(cleanslowloc, cleanfastloc, 1)[0] + ' b = ' + '%.5f' % np.polyfit(cleanslowloc, cleanfastloc, 1)[1],
+     horizontalalignment='center',
+     verticalalignment='center',
+     transform = ax.transAxes)
+#plt.show()
+plt.savefig('cleanpeakloc_lobf.jpg')
+plt.close()
+
+locdiff = cleanslowloc - cleanfastloc
+
+plt.figure(figsize=(7,5))
+plt.scatter(cleanslowint, locdiff, marker='.')
+plt.plot(np.unique(cleanslowint), np.poly1d(np.polyfit(cleanslowint, locdiff, 1))(np.unique(cleanslowint)), 'r')
 ax = plt.gca()
 ax.set_xlabel('integral around slow signal peak')
 ax.set_ylabel('slow signal peak location - fast signal peak location')
@@ -245,64 +347,16 @@ ax.set_ylabel('slow signal peak location - fast signal peak location')
 #	j += 1
 
 plt.grid()
-plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(newslowint, locdiff, 1)[0] + ' b = ' + '%.5f' % np.polyfit(newslowint, locdiff, 1)[1],
+plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(cleanslowint, locdiff, 1)[0] + ' b = ' + '%.5f' % np.polyfit(cleanslowint, locdiff, 1)[1],
      horizontalalignment='center',
      verticalalignment='center',
      transform = ax.transAxes)
 #plt.show()
-plt.savefig('slowint_peaklocdiff_correlation.jpg')
+plt.savefig('cleanslowint_peaklocdiff_correlation.jpg')
 plt.close()
 
-"""trnsgrsrs = []
 
-def error(i):
-	return slowint[i] - 10.99*fastlint[i] + 207.29
-
-for i in range(mononum):
-	err = error(i)
-	if np.abs(err) > 150:
-		trnsgrsrs.append([i,err])
-		plt.figure(figsize=(7,5))
-		plt.plot(time, expndata[monosgnl[i]], 'y', time, sgnldata[monosgnl[i]], 'b')
-		#plt.legend()
-		plt.grid()
-		#plt.show()
-		plt.savefig(filenames[monosgnl[i]] + '.jpg')
-		plt.close()
-
-trnsgrsrs = np.asarray(trnsgrsrs).astype(int)
-
-print(trnsgrsrs[:,0])
-
-cleansgnlint = np.delete(sgnlint, trnsgrsrs[:,0], 0)
-cleanexpnint = np.delete(expnint, trnsgrsrs[:,0], 0)
-
-plt.figure(figsize=(7,5))
-plt.scatter(cleansgnlint, cleanexpnint)
-ax = plt.gca()
-ax.set_xlabel('integral around original signal peak without anomalies')
-ax.set_ylabel('integral around stretched signal peak without anomalies')
-plt.grid()
-#plt.show()
-plt.savefig('cleanint_correlation.jpg')
-plt.close()
-
-plt.figure(figsize=(7,5))
-plt.scatter(cleansgnlint, cleanexpnint)
-plt.plot(np.unique(cleansgnlint), np.poly1d(np.polyfit(cleansgnlint, cleanexpnint, 1))(np.unique(cleansgnlint)), 'r')
-ax = plt.gca()
-ax.set_xlabel('integral around original signal peak')
-ax.set_ylabel('integral around stretched signal peak')
-plt.grid()
-plt.text(0.7, 0.1,'m = ' + '%.5f' % np.polyfit(cleansgnlint, cleanexpnint, 1)[0] + ' b = ' + '%.5f' % np.polyfit(cleansgnlint, cleanexpnint, 1)[1],
-     horizontalalignment='center',
-     verticalalignment='center',
-     transform = ax.transAxes)
-#plt.show()
-plt.savefig('cleanint_lobf.jpg')
-plt.close()
-
-cleanerr = sgnlint - (expnint + 226.62)/11.43
+"""cleanerr = sgnlint - (expnint + 226.62)/11.43
 
 plt.figure(figsize=(7,5))
 plt.hist(cleanerr, bins=100, label = 'error distribution')
