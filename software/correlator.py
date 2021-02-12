@@ -46,10 +46,10 @@ slowdata	= slowdata[:,minindex:maxindex]
 
 #classify into single signal and multiple signal first
 
-cutoff		= 5/origscale
-noiserms	= 1.09
-noisethres	= noiserms*3/origscale
-minpeakval	= 0.015
+cutoff		= 20/origscale
+noiserms	= np.sqrt(np.mean(fastdata[0]**2))
+print('rms is', noiserms)
+noisethres	= noiserms*3
 
 monosgnl   	= []	#signals with a single peak
 multisgnl   	= []	#signals with multiple peaks
@@ -114,6 +114,8 @@ for i in monosgnl:
 
 	j += 1
 
+
+minpeakval 	= np.amin(fastmax)
 newpeaks	= np.where(fastmax > minpeakval + noisethres)
 newmonosgnl	= monosgnl[newpeaks]
 newfastint 	= fastint[newpeaks]
